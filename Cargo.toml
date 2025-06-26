@@ -16,5 +16,8 @@ tokio = { version = "1.0", features = ["full"] }
 axum = "0.7" # error.rs 中用到了 axum::response
 # 在 [dependencies] 下添加
 uuid = { version = "1.0", features = ["v4", "serde"] }
+# 在 [dependencies] 下添加
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace", "fs"] }
 [dev-dependencies]
 # 暂时留空
