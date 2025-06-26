@@ -1,0 +1,10 @@
+[package]
+name = "todo-list"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# 暂时留空
+
+[dev-dependencies]
+# 暂时留空
