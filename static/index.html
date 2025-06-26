@@ -1,11 +1,605 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Todo List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List - Rust API Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .add-task-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #229954;
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .stats-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .filter-section {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .filter-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .tasks-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .task-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: background-color 0.3s;
+        }
+        
+        .task-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .task-content {
+            flex: 1;
+        }
+        
+        .task-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .task-title.completed {
+            text-decoration: line-through;
+            color: #7f8c8d;
+        }
+        
+        .task-description {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .task-meta {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+        
+        .error-message {
+            background-color: #fee;
+            color: #c0392b;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to Todo List!</h1>
-    <p>Frontend is loading...</p>
+    <div class="container">
+        <header>
+            <h1>📝 Todo List</h1>
+            <p class="subtitle">基于 Rust + Axum 构建的高性能任务管理系统</p>
+        </header>
+        
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+        
+        <div class="add-task-section">
+            <h2 style="margin-bottom: 15px;">添加新任务</h2>
+            <form id="addTaskForm">
+                <div class="form-group">
+                    <label for="taskTitle">任务标题 *</label>
+                    <input type="text" id="taskTitle" placeholder="输入任务标题..." maxlength="200" required>
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">任务描述</label>
+                    <textarea id="taskDescription" placeholder="输入任务描述（可选）..." maxlength="1000"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">➕ 添加任务</button>
+            </form>
+        </div>
+        
+        <div class="stats-section" id="statsSection">
+            <div class="stat-card">
+                <div class="stat-value" id="totalTasks">0</div>
+                <div class="stat-label">总任务数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completedTasks">0</div>
+                <div class="stat-label">已完成</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pendingTasks">0</div>
+                <div class="stat-label">未完成</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completionRate">0%</div>
+                <div class="stat-label">完成率</div>
+            </div>
+        </div>
+        
+        <div class="filter-section">
+            <span style="font-weight: 500;">筛选：</span>
+            <button class="filter-btn active" onclick="filterTasks('all')">全部</button>
+            <button class="filter-btn" onclick="filterTasks('pending')">未完成</button>
+            <button class="filter-btn" onclick="filterTasks('completed')">已完成</button>
+        </div>
+        
+        <div class="tasks-section">
+            <h2 style="margin-bottom: 15px;">任务列表</h2>
+            <div id="tasksList" class="loading">加载中...</div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = '/api';
+        let currentFilter = 'all';
+        let allTasks = [];
+        
+        // 显示错误消息
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // 显示成功消息
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) {
+                return '刚刚';
+            } else if (diff < 3600000) {
+                return Math.floor(diff / 60000) + ' 分钟前';
+            } else if (diff < 86400000) {
+                return Math.floor(diff / 3600000) + ' 小时前';
+            } else {
+                return date.toLocaleDateString('zh-CN');
+            }
+        }
+        
+        // 获取任务列表
+        async function fetchTasks() {
+            try {
+                const response = await fetch(`${API_BASE}/tasks`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    allTasks = data.data;
+                    displayTasks();
+                    updateStats();
+                } else {
+                    showError('获取任务列表失败');
+                }
+            } catch (error) {
+                showError('网络错误: ' + error.message);
+            }
+        }
+        
+        // 显示任务列表
+        function displayTasks() {
+            const tasksList = document.getElementById('tasksList');
+            let tasks = allTasks;
+            
+            // 应用筛选
+            if (currentFilter === 'completed') {
+                tasks = tasks.filter(task => task.completed);
+            } else if (currentFilter === 'pending') {
+                tasks = tasks.filter(task => !task.completed);
+            }
+            
+            if (tasks.length === 0) {
+                tasksList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>暂无${currentFilter === 'all' ? '' : currentFilter === 'completed' ? '已完成的' : '未完成的'}任务</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            tasksList.innerHTML = tasks.map(task => `
+                <div class="task-item fade-in">
+                    <input type="checkbox" 
+                           class="task-checkbox" 
+                           ${task.completed ? 'checked' : ''} 
+                           onchange="toggleTask('${task.id}', this.checked)">
+                    <div class="task-content">
+                        <div class="task-title ${task.completed ? 'completed' : ''}">${escapeHtml(task.title)}</div>
+                        ${task.description ? `<div class="task-description">${escapeHtml(task.description)}</div>` : ''}
+                        <div class="task-meta">
+                            创建于 ${formatDate(task.created_at)}
+                            ${task.updated_at !== task.created_at ? ` · 更新于 ${formatDate(task.updated_at)}` : ''}
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-danger btn-small" onclick="deleteTask('${task.id}')">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // HTML 转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // 更新统计信息
+        async function updateStats() {
+            try {
+                const response = await fetch(`${API_BASE}/tasks/stats`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('totalTasks').textContent = data.data.total;
+                    document.getElementById('completedTasks').textContent = data.data.completed;
+                    document.getElementById('pendingTasks').textContent = data.data.pending;
+                    document.getElementById('completionRate').textContent = Math.round(data.data.completion_rate) + '%';
+                }
+            } catch (error) {
+                console.error('获取统计信息失败:', error);
+            }
+        }
+        
+        // 添加任务
+        document.getElementById('addTaskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDescription').value.trim();
+            
+            if (!title) {
+                showError('请输入任务标题');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/tasks`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description: description || null
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('任务添加成功！');
+                    document.getElementById('addTaskForm').reset();
+                    fetchTasks();
+                } else {
+                    showError(data.error || '添加任务失败');
+                }
+            } catch (error) {
+                showError('网络错误: ' + error.message);
+            }
+        });
+        
+        // 切换任务状态
+        async function toggleTask(id, completed) {
+            try {
+                const response = await fetch(`${API_BASE}/tasks/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ completed }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess(completed ? '任务已完成！' : '任务标记为未完成');
+                    fetchTasks();
+                } else {
+                    showError(data.error || '更新任务失败');
+                    fetchTasks(); // 恢复原状态
+                }
+            } catch (error) {
+                showError('网络错误: ' + error.message);
+                fetchTasks(); // 恢复原状态
+            }
+        }
+        
+        // 删除任务
+        async function deleteTask(id) {
+            if (!confirm('确定要删除这个任务吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/tasks/${id}`, {
+                    method: 'DELETE',
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('任务删除成功！');
+                    fetchTasks();
+                } else {
+                    showError(data.error || '删除任务失败');
+                }
+            } catch (error) {
+                showError('网络错误: ' + error.message);
+            }
+        }
+        
+        // 筛选任务
+        function filterTasks(filter) {
+            currentFilter = filter;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            displayTasks();
+        }
+        
+        // 页面加载时获取任务列表
+        window.addEventListener('load', () => {
+            fetchTasks();
+            
+            // 定期刷新统计信息
+            setInterval(updateStats, 30000);
+        });
+        
+        // 检查 API 健康状态
+        async function checkHealth() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                console.log('API Health:', data);
+            } catch (error) {
+                console.error('Health check failed:', error);
+                showError('无法连接到服务器，请检查服务是否正在运行');
+            }
+        }
+        
+        checkHealth();
+    </script>
 </body>
 </html>
